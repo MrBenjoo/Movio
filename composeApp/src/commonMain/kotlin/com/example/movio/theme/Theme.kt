@@ -1,6 +1,7 @@
 package com.example.movio.theme
 
 import InterTypography
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -235,9 +236,11 @@ private val highContrastDarkColorScheme = darkColorScheme(
 )
 
 @Composable
-fun AppTheme(content: @Composable() () -> Unit) {
+fun AppTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable() () -> Unit) {
     MaterialTheme(
-        colorScheme = darkScheme,
+        colorScheme = if (isSystemInDarkTheme()) darkScheme else lightScheme,
         typography = InterTypography(),
         content = content
     )
