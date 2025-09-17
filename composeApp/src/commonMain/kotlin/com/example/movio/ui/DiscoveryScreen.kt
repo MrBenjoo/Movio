@@ -23,40 +23,43 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil3.compose.AsyncImage
+import com.example.movio.di.sharedModule
 import com.example.movio.model.Movie
-import com.example.movio.remote.MovieApi
-import com.example.movio.data.MovieRepository
 import com.example.movio.theme.AppTheme
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.KoinApplication
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun DiscoverScreen() {
-    val api = remember { MovieApi() }
-    val repository = remember { MovieRepository(api) }
-    val vm = remember { DiscoveryViewModel(repository) }
-    val lazyPagingItems = vm.movies.collectAsLazyPagingItems()
+    KoinApplication(
+        application = { modules(sharedModule) }
+    ) {
+        val vm = koinViewModel<DiscoveryViewModel>()
+        val lazyPagingItems = vm.movies.collectAsLazyPagingItems()
 
-    val isRefreshing by remember {
-        derivedStateOf {
-            lazyPagingItems.loadState.refresh is LoadState.Loading
+        val isRefreshing by remember {
+            derivedStateOf {
+                lazyPagingItems.loadState.refresh is LoadState.Loading
+            }
+        }
+
+        val isAppending by remember {
+            derivedStateOf {
+                lazyPagingItems.loadState.append is LoadState.Loading
+            }
+        }
+        AppTheme {
+            DiscoveryGridContent(
+                itemCount = lazyPagingItems.itemCount,
+                itemAt = { index -> lazyPagingItems[index] },
+                isRefreshing = isRefreshing,
+                isAppending = isAppending
+            )
         }
     }
 
-    val isAppending by remember {
-        derivedStateOf {
-            lazyPagingItems.loadState.append is LoadState.Loading
-        }
-    }
-
-    AppTheme {
-        DiscoveryGridContent(
-            itemCount = lazyPagingItems.itemCount,
-            itemAt = { index -> lazyPagingItems[index] },
-            isRefreshing = isRefreshing,
-            isAppending = isAppending
-        )
-    }
 }
 
 @Composable
